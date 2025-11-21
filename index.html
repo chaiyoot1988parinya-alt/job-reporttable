@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>✅ ระบบรายงานปัญหาการผลิต</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Sarabun', sans-serif; /* ใช้ฟอนต์ Sarabun เพื่อความเป็นไทย */
+            padding: 0;
+            margin: 0;
+            background: #f4f7f6; /* สีพื้นหลังอ่อนๆ สบายตา */
+            color: #333;
+            font-size:20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-height: 100vh; /* เต็มจอในมือถือ */
+        }
+
+        h2 {
+            text-align: center;
+            color: #007bff; /* สีน้ำเงินสดใส */
+            margin-bottom: 25px;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            font-size:30px;
+        }
+
+        /* Form Controls */
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 18px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 8px; /* มุมโค้งมน */
+            font-size: 20px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            -webkit-appearance: none; /* สำหรับ iOS/Safari */
+            appearance: none;
+            background-color: #fff;
+        }
+      
+        select {
+            background-image: url("https://script.google.com/macros/s/AKfycbw4g8JP6rg92K6fpqX-9Dlm2i3IkwMnWaf1z0eBi-juJgvv95V665FnckjzlyaafCow/exec");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 12px auto;
+            padding-right: 30px;
+        }
+
+
+        input:focus, select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+            outline: none;
+        }
+
+        /* Auto-Suggest List (Job No.) */
+        #partResults {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-top: none;
+            max-height: 180px;
+            overflow-y: auto;
+            border-radius: 0 0 8px 8px;
+            position: absolute;
+            width: calc(100% - 40px); /* ให้กว้างเท่ากับ input */
+            max-width: 600px;
+            z-index: 1000;
+            font-size:18px;
+        }
+
+        #partResults li {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 17px;
+        }
+
+        #partResults li:last-child {
+            border-bottom: none;
+        }
+
+        #partResults li:hover {
+            background: #e9f5ff;
+            color: #007bff;
+        }
+
+        /* Result Box */
+        .result {
+            margin-top: 20px;
+            background: #e6f0ff; /* สีฟ้าอ่อนสำหรับเน้นข้อมูล */
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #cce0ff;
+        }
+
+        .result p {
+            margin: 5px 0;
+            font-size: 17px;
+        }
+
+        .result strong {
+            color: #0056b3;
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        /* Button */
+        button {
+            background-color: #28a745; /* สีเขียวสำหรับปุ่มส่ง (Submit) */
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 30px;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+                box-shadow: none;
+            }
+            h2 {
+                font-size: 26px;
+                margin-top: 10px;
+            }
+            #partResults {
+                width: calc(100% - 20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>✅ ระบบรายงานปัญหาการผลิต</h2>
+
+        <label>เลขที่จ๊อบ(အလုပ်အကိုင်အမှတ်)</label>
+        <input type="text" id="partInput" placeholder="กรอกหรือเลือก JobNo." autocomplete="off" />
+        <ul id="partResults"></ul>
+
+        <div class="result">
+            <p><strong>รหัสงาน(အပိုင်းနံပါတ်):</strong> <span id="jobCode">-</span></p>
+            <p><strong>ชื่องาน(အပိုင်းအမည်):</strong> <span id="jobName">-</span></p>
+            <p><strong>จำนวน(ပမာဏ):</strong> <span id="quantity">-</span></p>
+        </div>
+
+        <label>ปัญหาที่พบ(ကြုံတွေ့ခဲ့ရသောပြဿနာများ)</label>
+        <select id="problemSelect"></select>
+
+        <label>สาเหตุที่เกิดปัญหา(ပြဿနာရဲ့ အကြောင်းရင်း)</label>
+        <div id="causeContainer">
+            <select id="causeSelect"></select>
+        </div>
+
+        <label>เครื่องจักรที่ผลิต(စက်နံပါတ်)</label>
+        <input type="text" id="machineNo" placeholder="ระบุหมายเลขเครื่องจักร" />
+
+        <label>แผนก(ဌာန)</label>
+        <select id="departmentSelect"></select>
+
+        <label>ผู้แจ้งปัญหา(သတင်းထောက်)</label>
+        <input type="text" id="reporterName" placeholder="ระบุชื่อผู้แจ้งปัญหา" />
+
+        <button onclick="submitReport()">แจ้งปัญหา / ပြဿနာတစ်ခုကို အစီရင်ခံပါ</button>
+    </div>
+
+
+   <script>
+  const baseURL = "https://script.google.com/macros/s/AKfycbyzVY1xtPnEi3jjILI77wIarzZvSWLLrxYbDiWGERPRK7KdzvAZEfctkJXUgw5ErtKQ/exec";
+  const partURL = `${baseURL}?mode=partList`;
+  const detailURL = `${baseURL}?mode=detail`;
+  const causeURL = `${baseURL}?mode=cause`;
+  const departmentURL = `${baseURL}?mode=department`;
+  const submitURL = baseURL;
+
+
+    let jobs = [];
+    let causeMap = {};
+
+    // โหลด Part List
+    fetch(partURL)
+      .then(res => res.json())
+      .then(data => {
+        jobs = data;
+        const input = document.getElementById("partInput");
+        const results = document.getElementById("partResults");
+
+        input.addEventListener("input", function () {
+          const keyword = this.value.toLowerCase();
+          results.innerHTML = ""; // ล้างรายการเก่า
+            
+            // ถ้ามีการพิมพ์อย่างน้อย 1 ตัวอักษร
+            if (keyword.length > 0) {
+                // ✅ แก้ไข: ใช้ .startsWith() เพื่อค้นหาที่ขึ้นต้นด้วยคำที่พิมพ์
+                jobs.filter(p => String(p).toLowerCase().startsWith(keyword)).forEach(p => { 
+                    const li = document.createElement("li");
+                    li.textContent = p;
+                    li.onmousedown = () => { // ใช้ onmousedown เพื่อให้ทำงานก่อน input blur
+                      input.value = p;
+                      results.innerHTML = "";
+                      loadJobDetails(p);
+                    };
+                    results.appendChild(li);
+                });
+            }
+        });
+        
+        // เพิ่ม: ค้นหาเมื่อกด Enter หรือออกจากช่อง เพื่อให้ดึงข้อมูลหลัก
+        input.addEventListener("blur", function () {
+            // หน่วงเวลาเล็กน้อยเพื่อให้ onmousedown ของ li ทำงานได้ก่อน
+            setTimeout(() => {
+                if (results.innerHTML === "" && this.value) { // ถ้าไม่มีรายการแนะนำเหลืออยู่ และมีค่าในช่อง
+                    loadJobDetails(this.value);
+                }
+                results.innerHTML = ""; // ซ่อนรายการที่แนะนำเมื่อออกจากช่อง
+            }, 150);
+        });
+        
+        input.addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                loadJobDetails(this.value);
+                results.innerHTML = "";
+            }
+        });
+
+      });
+
+    // โหลดรายละเอียดจาก DT
+    function loadJobDetails(partId) {
+      // ตรวจสอบว่า Part ID มีอยู่ใน jobs array ก่อนเรียก API
+      if (!jobs.includes(partId)) {
+        document.getElementById("jobCode").textContent = "-";
+        document.getElementById("jobName").textContent = "-";
+        document.getElementById("quantity").textContent = "-";
+        return; // ไม่ต้องเรียก API ถ้า Part ID ไม่ถูกต้อง
+      }
+      
+      fetch(`${detailURL}&partId=${partId}`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("jobCode").textContent = data.jobCode || "-";
+          document.getElementById("jobName").textContent = data.jobName || "-";
+          document.getElementById("quantity").textContent = data.quantity || "-";
+        });
+    }
+
+    // โหลดปัญหาและสาเหตุ
+    fetch(causeURL)
+      .then(res => res.json())
+      .then(data => {
+        causeMap = data;
+        const problemSelect = document.getElementById("problemSelect");
+        // ล้างรายการที่มีอยู่ (เผื่อมีการโหลดซ้ำ)
+        problemSelect.innerHTML = '';
+        Object.keys(data).forEach(problem => {
+          const option = document.createElement("option");
+          option.value = problem;
+          option.textContent = problem;
+          problemSelect.appendChild(option);
+        });
+
+        problemSelect.addEventListener("change", updateCauseField);
+        updateCauseField(); // โหลดครั้งแรก
+      });
+
+    // อัปเดตช่องสาเหตุ
+    function updateCauseField() {
+      const selected = document.getElementById("problemSelect").value;
+      const container = document.getElementById("causeContainer");
+      container.innerHTML = "";
+
+      const causes = causeMap[selected];
+
+      if (causes && causes.length === 1 && causes[0] === "กรุณาคีย์ข้อมูลด้วยตนเอง") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = "causeSelect";
+        input.placeholder = "กรุณาระบุสาเหตุที่เกิดปัญหา";
+        container.appendChild(input);
+      } else if (causes && causes.length > 0) {
+        const select = document.createElement("select");
+        select.id = "causeSelect";
+        causes.forEach(cause => {
+          const option = document.createElement("option");
+          option.value = cause;
+          option.textContent = cause;
+          select.appendChild(option);
+        });
+        container.appendChild(select);
+      } else {
+          // กรณีไม่มีสาเหตุในรายการ
+          const input = document.createElement("input");
+          input.type = "text";
+          input.id = "causeSelect";
+          input.placeholder = "กรุณาระบุสาเหตุที่เกิดปัญหา (ไม่มีข้อมูล)";
+          container.appendChild(input);
+      }
+    }
+
+    // โหลดแผนกจาก DPD!C
+    fetch(departmentURL)
+      .then(res => res.json())
+      .then(departments => {
+        const select = document.getElementById("departmentSelect");
+        select.innerHTML = '';
+        departments.forEach(dep => {
+          const option = document.createElement("option");
+          option.value = dep;
+          option.textContent = dep;
+          select.appendChild(option);
+        });
+      });
+
+    // ส่งข้อมูลไปยัง Apps Script
+    function submitReport() {
+      const partId = document.getElementById("partInput").value;
+      const jobNo = document.getElementById("jobCode").textContent; // รหัสงาน/Job No. จริงจาก DT!C
+      const problem = document.getElementById("problemSelect").value;
+      const causeField = document.getElementById("causeSelect");
+      const cause = causeField ? causeField.value : "";
+      const reporter = document.getElementById("reporterName").value;
+      const department = document.getElementById("departmentSelect").value;
+      const machine = document.getElementById("machineNo").value;
+
+      // ตรวจสอบข้อมูลที่จำเป็น
+      if (!partId || jobNo === "-" || !reporter || !department || !machine) {
+        alert("กรุณากรอก Part ID, Job Code, เครื่องจักร, แผนก และผู้แจ้งให้ครบถ้วน");
+        return;
+      }
+
+      const payload = new URLSearchParams({
+        mode: "reportProblem", 
+        partId, // ส่ง Part ID ไปด้วยสำหรับ Telegram
+        jobNo, 
+        problem, 
+        cause, 
+        reporter, 
+        department, 
+        machine
+      });
+
+      fetch(submitURL, {
+        method: "POST",
+        body: payload
+      })
+        .then(res => res.text())
+        .then(msg => {
+            alert(msg);
+            if (msg.startsWith("✅")) {
+                // ล้างฟอร์มเมื่อส่งสำเร็จ
+                document.getElementById("partInput").value = "";
+                document.getElementById("jobCode").textContent = "-";
+                document.getElementById("jobName").textContent = "-";
+                document.getElementById("quantity").textContent = "-";
+                document.getElementById("machineNo").value = "";
+                document.getElementById("reporterName").value = "";
+                updateCauseField();
+            }
+        })
+        .catch(err => alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + err.message));
+    }
+  </script>
+</body>
+</html>
